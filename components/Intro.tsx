@@ -20,7 +20,7 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
 
             <div className="w-full mb-8 rounded-xl overflow-hidden border-4 border-red-600 shadow-2xl relative group bg-black">
               <img
-                src="https://picsum.photos/seed/bald-eagle-usa/800/500"
+                src="/baldeagle.jpg"
                 alt="Bald Eagle"
                 className="w-full h-64 object-cover transform transition duration-700 group-hover:scale-105"
               />
@@ -46,7 +46,7 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
         <div className="max-w-md animate-in zoom-in duration-700">
           <div className="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden border-4 border-red-500 shadow-[0_0_40px_rgba(239,68,68,0.5)]">
             <img
-              src="https://picsum.photos/seed/bald-eagle-usa/400/400"
+              src="/baldeagle.jpg"
               alt="The Eagle"
               className="w-full h-full object-cover"
             />

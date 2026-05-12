@@ -5,7 +5,7 @@ export const LOCATIONS: LocationData[] = [
     id: 'liberty',
     name: 'Statue of Liberty',
     shortDescription: 'A torch. A gift. A new life.',
-    introImage: 'https://picsum.photos/seed/statue-liberty-ny/900/600',
+    introImage: '/Liberty.jpg',
     readingText: [
       "The Statue of Liberty is in New York Harbor.",
       "It is a giant green statue of a woman.",
@@ -95,7 +95,7 @@ export const LOCATIONS: LocationData[] = [
     id: 'rushmore',
     name: 'Mount Rushmore',
     shortDescription: 'Four presidents. Sacred hills. Old spirits.',
-    introImage: 'https://picsum.photos/seed/mount-rushmore-sd/900/600',
+    introImage: '/mountrushmore.jpg',
     readingText: [
       "Mount Rushmore is in the Black Hills of South Dakota.",
       "Four famous presidents are carved into the rock.",
@@ -185,7 +185,7 @@ export const LOCATIONS: LocationData[] = [
     id: 'goldengate',
     name: 'Golden Gate Bridge',
     shortDescription: 'Orange and tall. Fog. Island of secrets.',
-    introImage: 'https://picsum.photos/seed/golden-gate-sf/900/600',
+    introImage: '/Goldengatebridge.jpg',
     readingText: [
       "The Golden Gate Bridge is in San Francisco, California.",
       "It is one of the most famous bridges in the world.",
@@ -275,7 +275,7 @@ export const LOCATIONS: LocationData[] = [
     id: 'whitehouse',
     name: 'The White House',
     shortDescription: 'Capital city. Oval Office. Past presidents.',
-    introImage: 'https://picsum.photos/seed/white-house-dc/900/600',
+    introImage: '/thewhitehouse.jpg',
     readingText: [
       "The White House is in Washington D.C., the capital of the USA.",
       "It is the official home of the President of the United States.",
