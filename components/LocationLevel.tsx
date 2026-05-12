@@ -3,7 +3,7 @@ import { LocationData } from '../types';
 import Button from './Button';
 import SentenceBuilder from './SentenceBuilder';
 import MissingWords from './MissingWords';
-import { BookOpen, Check, ArrowLeft, ArrowRight, Flame, Star, Anchor, Shield } from 'lucide-react';
+import { BookOpen, Check, ArrowLeft, ArrowRight, Flame, Star, Anchor, Shield, AlertTriangle } from 'lucide-react';
 
 interface LocationLevelProps {
   location: LocationData;
@@ -11,13 +11,27 @@ interface LocationLevelProps {
   onComplete: () => void;
 }
 
-type Step = 'intro' | 'reading' | 'quiz' | 'sentence-builder' | 'missing-words' | 'success';
+type Step = 'intro' | 'reading' | 'quiz' | 'reading-retry' | 'sentence-builder' | 'missing-words' | 'success';
 
 const LocationLevel: React.FC<LocationLevelProps> = ({ location, onBack, onComplete }) => {
   const [step, setStep] = useState<Step>('intro');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [quizFeedback, setQuizFeedback] = useState<'none' | 'correct' | 'incorrect'>('none');
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [correctOnFirstAttempt, setCorrectOnFirstAttempt] = useState(0);
+  const [isFirstCheck, setIsFirstCheck] = useState(true);
+  const [lastScore, setLastScore] = useState(0);
+
+  const totalQuestions = location.questions.length;
+  const passingThreshold = totalQuestions / 2;
+
+  const resetQuiz = () => {
+    setCurrentQuestionIndex(0);
+    setQuizFeedback('none');
+    setSelectedOption(null);
+    setCorrectOnFirstAttempt(0);
+    setIsFirstCheck(true);
+  };
 
   if (step === 'intro') {
     return (
@@ -55,8 +69,39 @@ const LocationLevel: React.FC<LocationLevelProps> = ({ location, onBack, onCompl
               <p key={idx}>{paragraph}</p>
             ))}
           </div>
-          <Button onClick={() => setStep('quiz')} className="w-full">
+          <Button onClick={() => { resetQuiz(); setStep('quiz'); }} className="w-full">
             Start Challenge <ArrowRight className="w-5 h-5" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'reading-retry') {
+    return (
+      <div className="min-h-screen bg-slate-900 pt-20 px-4 flex justify-center">
+        <div className="max-w-2xl w-full bg-slate-800 p-6 sm:p-10 rounded-xl shadow-xl border border-slate-600">
+          <div className="flex items-center gap-3 bg-red-900/30 border border-red-700 rounded-lg p-4 mb-6">
+            <AlertTriangle className="w-6 h-6 text-red-400 shrink-0" />
+            <div>
+              <p className="text-red-300 font-bold">Not enough correct answers</p>
+              <p className="text-red-200 text-sm">
+                You got {lastScore} out of {totalQuestions} questions right on the first try.
+                Read the text again carefully before your next attempt.
+              </p>
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-serif text-red-400 mb-6 border-b border-slate-600 pb-2">
+            History & Culture: {location.name}
+          </h2>
+          <div className="space-y-4 text-lg text-slate-200 leading-relaxed font-sans mb-8">
+            {location.readingText.map((paragraph, idx) => (
+              <p key={idx}>{paragraph}</p>
+            ))}
+          </div>
+          <Button onClick={() => { resetQuiz(); setStep('quiz'); }} className="w-full">
+            I read the text <ArrowRight className="w-5 h-5" />
           </Button>
         </div>
       </div>
@@ -67,20 +112,30 @@ const LocationLevel: React.FC<LocationLevelProps> = ({ location, onBack, onCompl
     const currentQuestion = location.questions[currentQuestionIndex];
 
     const handleCheckAnswer = () => {
-      if (selectedOption === currentQuestion.correctIndex) {
-        setQuizFeedback('correct');
-      } else {
-        setQuizFeedback('incorrect');
+      const isCorrect = selectedOption === currentQuestion.correctIndex;
+      if (isFirstCheck) {
+        if (isCorrect) setCorrectOnFirstAttempt(prev => prev + 1);
+        setIsFirstCheck(false);
       }
+      setQuizFeedback(isCorrect ? 'correct' : 'incorrect');
     };
 
     const handleNext = () => {
-      if (currentQuestionIndex < location.questions.length - 1) {
+      if (currentQuestionIndex < totalQuestions - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
         setQuizFeedback('none');
         setSelectedOption(null);
+        setIsFirstCheck(true);
       } else {
-        setStep('sentence-builder');
+        // Last question done — evaluate score
+        // Add 1 if this last question was correct on first attempt (already counted in state)
+        const finalScore = correctOnFirstAttempt;
+        setLastScore(finalScore);
+        if (finalScore > passingThreshold) {
+          setStep('sentence-builder');
+        } else {
+          setStep('reading-retry');
+        }
       }
     };
 
@@ -88,7 +143,7 @@ const LocationLevel: React.FC<LocationLevelProps> = ({ location, onBack, onCompl
       <div className="min-h-screen bg-slate-900 pt-20 px-4 flex justify-center items-center">
         <div className="max-w-2xl w-full bg-slate-800 p-6 sm:p-10 rounded-xl shadow-xl border border-slate-600">
           <div className="flex justify-between items-center mb-6 text-slate-400">
-            <span>Question {currentQuestionIndex + 1} of {location.questions.length}</span>
+            <span>Question {currentQuestionIndex + 1} of {totalQuestions}</span>
             <span className="text-red-400 text-sm cursor-pointer hover:underline" onClick={() => setStep('reading')}>Read Text Again</span>
           </div>
 
@@ -134,7 +189,7 @@ const LocationLevel: React.FC<LocationLevelProps> = ({ location, onBack, onCompl
               </Button>
             ) : (
               <Button onClick={handleNext}>
-                {currentQuestionIndex < location.questions.length - 1 ? 'Next Question' : 'Next Challenge'}
+                {currentQuestionIndex < totalQuestions - 1 ? 'Next Question' : 'Next Challenge'}
               </Button>
             )}
           </div>
