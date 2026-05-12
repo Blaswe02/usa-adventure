@@ -199,34 +199,36 @@ const LocationLevel: React.FC<LocationLevelProps> = ({ location, onBack, onCompl
             </p>
           </div>
 
-          {/* Per-question breakdown */}
-          <div className="space-y-3 mb-8">
-            {location.questions.map((q, idx) => {
-              const isCorrect = answers[idx] === q.correctIndex;
-              return (
-                <div
-                  key={q.id}
-                  className={`flex items-start gap-3 p-4 rounded-lg border ${
-                    isCorrect ? 'bg-green-900/20 border-green-800/60' : 'bg-red-900/20 border-red-800/60'
-                  }`}
-                >
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                    isCorrect ? 'bg-green-700' : 'bg-red-700'
-                  }`}>
-                    {isCorrect
-                      ? <Check className="w-3.5 h-3.5 text-white" />
-                      : <X className="w-3.5 h-3.5 text-white" />
-                    }
+          {/* Per-question breakdown — only shown when passed */}
+          {passed && (
+            <div className="space-y-3 mb-8">
+              {location.questions.map((q, idx) => {
+                const isCorrect = answers[idx] === q.correctIndex;
+                return (
+                  <div
+                    key={q.id}
+                    className={`flex items-start gap-3 p-4 rounded-lg border ${
+                      isCorrect ? 'bg-green-900/20 border-green-800/60' : 'bg-red-900/20 border-red-800/60'
+                    }`}
+                  >
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                      isCorrect ? 'bg-green-700' : 'bg-red-700'
+                    }`}>
+                      {isCorrect
+                        ? <Check className="w-3.5 h-3.5 text-white" />
+                        : <X className="w-3.5 h-3.5 text-white" />
+                      }
+                    </div>
+                    <div className="text-sm">
+                      <p className={`font-semibold ${isCorrect ? 'text-green-200' : 'text-red-200'}`}>
+                        {idx + 1}. {q.text}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-sm">
-                    <p className={`font-semibold ${isCorrect ? 'text-green-200' : 'text-red-200'}`}>
-                      {idx + 1}. {q.text}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Action button */}
           {passed ? (
