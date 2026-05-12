@@ -4,9 +4,10 @@ import { Flame, Star, Anchor, Shield } from 'lucide-react';
 
 interface InventoryProps {
   symbols: SymbolType[];
+  onSymbolsClick: () => void;
 }
 
-const Inventory: React.FC<InventoryProps> = ({ symbols }) => {
+const Inventory: React.FC<InventoryProps> = ({ symbols, onSymbolsClick }) => {
   const getIcon = (type: SymbolType) => {
     switch (type) {
       case 'Flame': return <Flame className="w-5 h-5 text-red-400" />;
@@ -24,8 +25,13 @@ const Inventory: React.FC<InventoryProps> = ({ symbols }) => {
         Liberty's Quest
       </div>
 
-      <div className="flex gap-2">
-        <span className="text-blue-200/70 text-sm mr-2 flex items-center">Symbols:</span>
+      <div className="flex gap-2 items-center">
+        <span
+          className="text-blue-200/70 text-sm mr-2 flex items-center cursor-default select-none"
+          onClick={onSymbolsClick}
+        >
+          Symbols:
+        </span>
         {allSymbols.map((s) => (
           <div
             key={s}

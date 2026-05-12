@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ViewState, PlayerState, LocationData } from './types';
+import React, { useState, useRef } from 'react';
+import { ViewState, PlayerState } from './types';
 import { LOCATIONS } from './data';
 import Intro from './components/Intro';
 import MapHub from './components/MapHub';
@@ -7,8 +7,12 @@ import LocationLevel from './components/LocationLevel';
 import OracleChamber from './components/OracleChamber';
 import MysteryGate from './components/MysteryGate';
 import Inventory from './components/Inventory';
+import TeacherPreview from './components/TeacherPreview';
 import Button from './components/Button';
-import { Star, RotateCcw } from 'lucide-react';
+import { Star, RotateCcw, X } from 'lucide-react';
+
+const TEACHER_PASSCODE = 'USA';
+const SECRET_CLICKS_REQUIRED = 5;
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('intro');
@@ -19,11 +23,17 @@ const App: React.FC = () => {
   });
   const [activeLocationId, setActiveLocationId] = useState<string | null>(null);
 
+  // Teacher preview state
+  const [symbolClickCount, setSymbolClickCount] = useState(0);
+  const [showPasscodeModal, setShowPasscodeModal] = useState(false);
+  const [passcodeInput, setPasscodeInput] = useState('');
+  const [passcodeError, setPasscodeError] = useState(false);
+  const [showTeacherPreview, setShowTeacherPreview] = useState(false);
+  const clickResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const activeLocation = LOCATIONS.find(l => l.id === activeLocationId);
 
-  const handleIntroComplete = () => {
-    setView('map');
-  };
+  const handleIntroComplete = () => setView('map');
 
   const handleSelectLocation = (id: string) => {
     setActiveLocationId(id);
@@ -47,23 +57,89 @@ const App: React.FC = () => {
     setView('map');
   };
 
-  const handleEnterOracle = () => {
-    setView('mystery_gate');
-  };
-
-  const handleMysteryGateComplete = () => {
-    setView('oracle');
-  };
+  const handleEnterOracle = () => setView('mystery_gate');
+  const handleMysteryGateComplete = () => setView('oracle');
 
   const handleFinalComplete = (dream: string) => {
     setPlayerState(prev => ({ ...prev, dream }));
     setView('ending');
   };
 
+  // Secret click handler on "Symbols:" label
+  const handleSymbolsClick = () => {
+    // Reset the auto-clear timer on each click
+    if (clickResetTimer.current) clearTimeout(clickResetTimer.current);
+    clickResetTimer.current = setTimeout(() => setSymbolClickCount(0), 3000);
+
+    const newCount = symbolClickCount + 1;
+    if (newCount >= SECRET_CLICKS_REQUIRED) {
+      setSymbolClickCount(0);
+      setPasscodeInput('');
+      setPasscodeError(false);
+      setShowPasscodeModal(true);
+    } else {
+      setSymbolClickCount(newCount);
+    }
+  };
+
+  const handlePasscodeSubmit = () => {
+    if (passcodeInput.toUpperCase() === TEACHER_PASSCODE) {
+      setShowPasscodeModal(false);
+      setPasscodeInput('');
+      setPasscodeError(false);
+      setShowTeacherPreview(true);
+    } else {
+      setPasscodeError(true);
+      setPasscodeInput('');
+    }
+  };
+
+  // Teacher preview — shown above everything else
+  if (showTeacherPreview) {
+    return <TeacherPreview locations={LOCATIONS} onClose={() => setShowTeacherPreview(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-red-500 selection:text-white">
       {view !== 'intro' && view !== 'ending' && (
-        <Inventory symbols={playerState.inventory} />
+        <Inventory symbols={playerState.inventory} onSymbolsClick={handleSymbolsClick} />
+      )}
+
+      {/* Passcode modal */}
+      {showPasscodeModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-8 w-full max-w-sm shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-serif text-yellow-400">Teacher Access</h2>
+              <button
+                onClick={() => { setShowPasscodeModal(false); setPasscodeError(false); }}
+                className="text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-slate-400 text-sm mb-4">Enter the passcode to view all content and answer keys.</p>
+
+            <input
+              type="password"
+              value={passcodeInput}
+              onChange={e => { setPasscodeInput(e.target.value); setPasscodeError(false); }}
+              onKeyDown={e => e.key === 'Enter' && handlePasscodeSubmit()}
+              placeholder="Passcode"
+              autoFocus
+              className="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 mb-3 font-mono tracking-widest text-center text-lg"
+            />
+
+            {passcodeError && (
+              <p className="text-red-400 text-sm text-center mb-3 animate-pulse">Incorrect passcode. Try again.</p>
+            )}
+
+            <Button onClick={handlePasscodeSubmit} className="w-full bg-yellow-600 hover:bg-yellow-500 border-yellow-400">
+              Enter
+            </Button>
+          </div>
+        </div>
       )}
 
       {view === 'intro' && (
@@ -88,10 +164,7 @@ const App: React.FC = () => {
       )}
 
       {view === 'mystery_gate' && (
-        <MysteryGate
-          locations={LOCATIONS}
-          onComplete={handleMysteryGateComplete}
-        />
+        <MysteryGate locations={LOCATIONS} onComplete={handleMysteryGateComplete} />
       )}
 
       {view === 'oracle' && (
@@ -104,7 +177,6 @@ const App: React.FC = () => {
           <div className="bg-slate-900 p-8 rounded-xl shadow-2xl border border-red-700 max-w-lg w-full">
             <h2 className="text-xl text-slate-400 mb-4">Your American Dream:</h2>
             <p className="text-2xl font-serif text-white italic mb-8">"{playerState.dream}"</p>
-
             <div className="flex flex-col gap-4">
               <div className="flex justify-center gap-3 mb-2">
                 <Star className="w-6 h-6 text-yellow-400" />
