@@ -222,11 +222,6 @@ const LocationLevel: React.FC<LocationLevelProps> = ({ location, onBack, onCompl
                     <p className={`font-semibold ${isCorrect ? 'text-green-200' : 'text-red-200'}`}>
                       {idx + 1}. {q.text}
                     </p>
-                    {!isCorrect && (
-                      <p className="text-slate-400 mt-1">
-                        Correct answer: <span className="text-green-400 font-semibold">{q.options[q.correctIndex]}</span>
-                      </p>
-                    )}
                   </div>
                 </div>
               );
