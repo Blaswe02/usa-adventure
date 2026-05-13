@@ -8,6 +8,7 @@ import OracleChamber from './components/OracleChamber';
 import MysteryGate from './components/MysteryGate';
 import Inventory from './components/Inventory';
 import TeacherPreview from './components/TeacherPreview';
+import Reflection from './components/Reflection';
 import Button from './components/Button';
 import { Star, RotateCcw, X } from 'lucide-react';
 
@@ -62,7 +63,7 @@ const App: React.FC = () => {
 
   const handleFinalComplete = (dream: string) => {
     setPlayerState(prev => ({ ...prev, dream }));
-    setView('ending');
+    setView('reflection');
   };
 
   // Secret click handler on "Symbols:" label
@@ -169,6 +170,10 @@ const App: React.FC = () => {
 
       {view === 'oracle' && (
         <OracleChamber onComplete={handleFinalComplete} />
+      )}
+
+      {view === 'reflection' && (
+        <Reflection onComplete={() => setView('ending')} />
       )}
 
       {view === 'ending' && (

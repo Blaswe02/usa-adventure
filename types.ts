@@ -1,5 +1,5 @@
 
-export type ViewState = 'intro' | 'map' | 'location' | 'mystery_gate' | 'oracle' | 'ending';
+export type ViewState = 'intro' | 'map' | 'location' | 'mystery_gate' | 'oracle' | 'reflection' | 'ending';
 
 export type SymbolType = 'Flame' | 'Star' | 'Anchor' | 'Shield';
 
